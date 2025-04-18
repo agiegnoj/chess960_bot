@@ -41,9 +41,9 @@ public class GameFlowGUI {
         
         JPanel tempPanel = new JPanel(new GridLayout(3, 1, 10, 10));
 
-        JButton easyButton = new JButton("Depth 8");
-        JButton mediumButton = new JButton("Depth 10");
-        JButton hardButton = new JButton("Depth 12");
+        JButton easyButton = new JButton("Depth 6");
+        JButton mediumButton = new JButton("Depth 8");
+        JButton hardButton = new JButton("Depth 10");
         
         easyButton.setBackground(Color.WHITE);
         easyButton.setFont(new Font("Arial", Font.PLAIN, 30));
@@ -52,9 +52,9 @@ public class GameFlowGUI {
         hardButton.setBackground(Color.WHITE);
         hardButton.setFont(new Font("Arial", Font.PLAIN, 30));
 
-        easyButton.addActionListener(e -> initialize(8));
-        mediumButton.addActionListener(e -> initialize(10));
-        hardButton.addActionListener(e -> initialize(12));
+        easyButton.addActionListener(e -> initialize(6));
+        mediumButton.addActionListener(e -> initialize(8));
+        hardButton.addActionListener(e -> initialize(10));
 
         tempPanel.add(easyButton);
         tempPanel.add(mediumButton);
