@@ -42,7 +42,7 @@ public class BoardEvaluation {
             int y = m.getCurrentY();
             if (x >= 2 && x <= 5 && y >= 2 && y <= 5) {
                 val += 5;
-                if(x >= 2 && x <= 5 && y >= 2 && y <= 5)
+                if(x >= 3 && x <= 4 && y >= 3 && y <= 4)
                 val += 6;
             }        
             val++;
@@ -53,7 +53,7 @@ public class BoardEvaluation {
             int y = m.getCurrentY();
             if (x >= 2 && x <= 5 && y >= 2 && y <= 5) {
                 val -= 5;
-                if(x >= 2 && x <= 5 && y >= 2 && y <= 5)
+                if(x >= 3 && x <= 4 && y >= 3 && y <= 4)
                 val -= 6;
             }        
             val--;
