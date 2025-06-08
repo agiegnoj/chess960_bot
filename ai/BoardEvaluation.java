@@ -7,7 +7,7 @@ import boilerplate.*;
 
 public class BoardEvaluation {
     
-    private int gamePhase = 0;
+    private int gamePhase;
     List<Move> botMoves;
     List<Move> playerMoves;
     Board board;
@@ -36,31 +36,31 @@ public class BoardEvaluation {
     
     private int squareControl() {
        
-        int val = 0;
+        int squareControl = 0;
         for (Move m : botMoves) {
             int x = m.getCurrentX();
             int y = m.getCurrentY();
             if (x >= 2 && x <= 5 && y >= 2 && y <= 5) {
-                val += 5;
+                squareControl += 5;
                 if(x >= 3 && x <= 4 && y >= 3 && y <= 4)
-                val += 6;
+                squareControl += 6;
             }        
-            val++;
+            squareControl++;
         }
         
         for (Move m : playerMoves) {
             int x = m.getCurrentX();
             int y = m.getCurrentY();
             if (x >= 2 && x <= 5 && y >= 2 && y <= 5) {
-                val -= 5;
+                squareControl -= 5;
                 if(x >= 3 && x <= 4 && y >= 3 && y <= 4)
-                val -= 6;
+                squareControl -= 6;
             }        
-            val--;
+            squareControl--;
         }
         
          
-        return val*4; 
+        return squareControl*4; 
     }
 
     int pieceBalance() {
@@ -253,7 +253,7 @@ public class BoardEvaluation {
                     }      
                 }
                 if (connected)
-                val += 70;      
+                val += 280;      
             }else if (x1 == x2) {
                 int minY = Math.min(y1, y2);
                 int maxY = Math.max(y1,  y2);
@@ -265,7 +265,7 @@ public class BoardEvaluation {
                     }      
                 }
                 if (connected)
-                val += 70;      
+                val += 280;      
             }          
         }
         
@@ -275,8 +275,8 @@ public class BoardEvaluation {
     
     private int bishopPair() {
         int val = 0; 
-        if (bishopCountBot == 2)val += 50;
-        if(bishopCountPlayer == 2)val -= 50;
+        if (bishopCountBot == 2)val += 200;
+        if(bishopCountPlayer == 2)val -= 200;
         return val;
     }
 
@@ -576,8 +576,8 @@ public class BoardEvaluation {
     private void initialize(Board b) {
         this.board = b;
         gamePhase = board.getGamePhase();
-        botMoves = board.getMoves(true);
-        playerMoves = board.getMoves(false);
+        botMoves = board.getMoves(true, false);
+        playerMoves = board.getMoves(false, false);
         botPawns = new ArrayList<>();
         playerPawns = new ArrayList<>();
         botRooks = new ArrayList<>();

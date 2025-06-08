@@ -7,16 +7,13 @@ import boilerplate.Board;
 import boilerplate.King;
 import boilerplate.Move;
 import boilerplate.Pawn;
-import boilerplate.Queen;
-import boilerplate.Rook;
 
 public class AlphaBetaSearch {
     private int depth;
-    FixedSizeHashMap <Long, Integer> evaluations;
-    BoardEvaluation be;
-    MoveComparator compare;
-    Board board;
-    int currentEval;
+    private FixedSizeHashMap <Long, Integer> evaluations;
+    private BoardEvaluation be;
+    private MoveComparator compare;
+    private Board board;
 
     public AlphaBetaSearch(int depth, Board board) {
         this.depth = depth;
@@ -27,16 +24,19 @@ public class AlphaBetaSearch {
     }
     
     public Move getBestMove() {
-        currentEval = be.evaluate(board);
-        List <Move> moves = getFilteredMoves();
-        Move bestMove = null;       
-        int s = moves.size();      
         
-        for (int iterativeDeepening = 1; iterativeDeepening <= depth; iterativeDeepening++) {
+        List <Move> moves = getFilteredMoves();
+        Move bestMoveLastDepth = null;       
+        int s = moves.size();  
+        int iterativeDeepening = 1;
+        long endTime = System.currentTimeMillis()+1000;
+        
+        while(true) {
             int value = Integer.MIN_VALUE;
-            
+            Move bestMove = null;
+            if (iterativeDeepening >depth)return bestMoveLastDepth;
             for (int j = 0; j<s; j++) {
-                
+                if(System.currentTimeMillis()> endTime)return bestMoveLastDepth;
                 Move m = moves.get(j);
 
                 board.makeMove(m);
@@ -45,24 +45,26 @@ public class AlphaBetaSearch {
                 if (eval > value) {
                     value = eval;
                     bestMove = m;
-                }    
+                }
         }
             
+            if(bestMove != null)
+            bestMoveLastDepth = bestMove;
+            iterativeDeepening++;
         }
-                  
-        return bestMove;     
+                       
     }
     
 
     public int alphaBeta(int alpha, int beta, int remainingDepth, boolean maximizingPlayer) {
         long prime = maximizingPlayer ? 31 : 37;
-        long nodeHash = prime*(long)board.hashCode()+(long)remainingDepth;
+        long nodeHash = (prime*(long)board.hashCode())<<4+(long)remainingDepth;
         
         if (evaluations.containsKey(nodeHash)) {
             return evaluations.get(nodeHash);
         }
             
-        
+     
         if (remainingDepth == 0) {
             int eval = be.evaluate(board);
             evaluations.put(nodeHash, eval);
@@ -72,10 +74,12 @@ public class AlphaBetaSearch {
         
         if (maximizingPlayer) {
             int val = alpha;
-            List <Move> moves = board.getMoves(true);
+            List <Move> moves = board.getMoves(true, false);
+            if (remainingDepth != 1)
             moves.sort(compare);
                 
-            for (Move m : moves) {              
+            for (Move m : moves) {
+                
                 board.makeMove(m);
                 val = Math.max(val, alphaBeta(alpha, beta, remainingDepth-1, false));
                 board.undoLastMove();
@@ -90,7 +94,8 @@ public class AlphaBetaSearch {
             
         }else {
             int val = beta;
-            List <Move> moves = board.getMoves(false);
+            List <Move> moves = board.getMoves(false, false);
+            if (remainingDepth != 1)
             moves.sort(compare);
                  
             for (Move m : moves) { 
@@ -109,7 +114,8 @@ public class AlphaBetaSearch {
     }
       
     private List<Move> getFilteredMoves() {
-        List<Move> moves = board.getMoves(true);
+        List<Move> moves = board.getMoves(true, true);
+        
         List<Move> fallBack = new ArrayList<>();
         List<Move> filtered = new ArrayList<>();
         moves.sort(compare);
@@ -118,7 +124,7 @@ public class AlphaBetaSearch {
             if (!blunder(m)) {
                 filtered.add(m);
                 fallBack.add(m);
-            }else if (fallBack.size() < 4) {
+            }else if (fallBack.size() < 2) {
                 fallBack.add(m);
             }  
             
@@ -127,12 +133,12 @@ public class AlphaBetaSearch {
     }
 
     private boolean blunder(Move m) {
-          
-        if (m.getMovedPiece() instanceof King ||(!(m.getMovedPiece() instanceof Pawn) && (!m.captures() || m.getCapturedPiece()instanceof Pawn ))) {
+        
+        if (m.getMovedPiece() instanceof King ||(!(m.getMovedPiece() instanceof Pawn) && (!m.captures()))) {
             board.makeMove(m);
             int x = m.getCurrentX();
             int y = m.getCurrentY();
-            List<Move> moves= board.getMoves(false);
+            List<Move> moves= board.getMoves(false, false);
             board.undoLastMove();
             
             for (Move mv : moves) {
@@ -140,11 +146,6 @@ public class AlphaBetaSearch {
                     return true;
                 }         
             }
-        }else {
-            board.makeMove(m);
-            int temp = alphaBeta(Integer.MIN_VALUE, Integer.MAX_VALUE, depth/2, false);
-            board.undoLastMove();
-            if (temp < currentEval -5000)return true;
         }
        
         return false;  
