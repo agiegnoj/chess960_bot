@@ -1,2 +1,2 @@
--version one finished on May 6th 2025 
+-version one finished on May 6th 2025 \n
 -updated on June 8th 2025 (added limited search time, optimizations, changed heuristic weights)
