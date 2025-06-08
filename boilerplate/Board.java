@@ -12,7 +12,9 @@ public class Board {
     private Stack<Move> lastMoves;   
     private List<Piece> botPieces;
     private List<Piece> playerPieces;  
-    boolean checkMate;
+    private King botKing;
+    private King playerKing;
+    
           
     public Board(char botColor, char playerColor) {
         board = new Piece[8][8]; 
@@ -91,8 +93,9 @@ public class Board {
         board[0][remaining[0]] = new Rook(botColor, true, 0, remaining[0], this);  
         
         board[7][remaining[1]] = new King(playerColor, false, 7, remaining[1], this);
+        playerKing = (King) board[7][remaining[1]];
         board[0][remaining[1]] = new King(botColor, true, 0, remaining[1], this); 
-        
+        botKing = (King) board[0][remaining[1]];
         board[7][remaining[2]] = new Rook(playerColor, false, 7, remaining[2], this);
         board[0][remaining[2]] = new Rook(botColor, true, 0, remaining[2], this);  
         
@@ -106,7 +109,7 @@ public class Board {
     }
 
    
-    public List<Move> getMoves(boolean isBot){
+    public List<Move> getMoves(boolean isBot, boolean inCheckCheck){
         List<Move> moves = new ArrayList<>();
         List<Piece> pieces = isBot ? botPieces : playerPieces;
 
@@ -114,25 +117,23 @@ public class Board {
             p.getValidMoves(moves);
         }
         
+        if(inCheckCheck && isInCheck(true)) {
+            List<Move> legalMoves = new ArrayList<>();
 
-        if ((isBot && !isInCheck(true)) || (!isBot && !isInCheck(false))) 
-            return moves;
-        
+            for (Move move : moves) {
+                makeMove(move);
+                boolean stillInCheck = isInCheck(true);
+                undoLastMove();
 
-        List<Move> legalMoves = new ArrayList<>();
-
-        for (Move move : moves) {
-            makeMove(move);
-            boolean stillInCheck = isInCheck(isBot);
-            undoLastMove();
-
-            if (!stillInCheck) {
-                legalMoves.add(move);
+                if (!stillInCheck) {
+                    legalMoves.add(move);
+                }
             }
+            
+            return legalMoves.size() != 0 ? legalMoves : moves;
         }
         
-
-        return legalMoves.size() != 0 ? legalMoves : moves;
+        return moves;
     }
     
     public List<Piece> getPieces(boolean bot){
@@ -243,6 +244,7 @@ public class Board {
     
     
     public boolean isInCheck(boolean isBot) {
+        
         List<Piece> enemyPieces = isBot ? playerPieces : botPieces;
         Piece king = null;
 
@@ -275,17 +277,9 @@ public class Board {
     
     public boolean checkMate(boolean botWin) {
         if (botWin) {
-            for (Piece p : playerPieces) {
-                if (p instanceof King)
-                    return false;
-            }
-            return true;
+            return !playerPieces.contains(playerKing);
         }else {
-            for (Piece p : botPieces) {
-                if (p instanceof King)
-                    return false;
-            }
-            return true;
+            return !botPieces.contains(botKing);
         }
     }
     
